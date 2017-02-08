@@ -1,0 +1,69 @@
+<html>
+    <head>
+        <title>Math is fun?!</title>
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+        <script type="text/javascript" src="jquery.jsonrpc.js"></script>
+        <script type="text/javascript">
+
+		var username = "admin";//$("input#username").val();
+		var password = "admin";//$("input#password").val();  
+
+		var markers = { "markers": [
+		  { "position": "128.3657142857143", "markerPosition": "7" },
+		  { "position": "235.1944023323615", "markerPosition": "19" },
+		  { "position": "42.5978231292517", "markerPosition": "-3" }
+		]};		
+
+		function make_base_auth(user, password) {
+		  var tok = user + ':' + password;
+		  var hash = btoa(tok);
+		  return "Basic " + hash;
+		}
+		
+		
+			//$(document).ready(function(){
+			//		$("input#evaluate").click(function(){             
+						$.ajax({
+							type: "GET",
+							url: "http://211.79.63.108:8080/status",
+							dataType: 'json',
+							data: {"jsonrpc": "2.0", "method": "getPhysicalFlowtable", "params": {}},
+							//data: markers,
+							contentType: "application/json; charset=utf-8",
+							xhrFields: {
+								withCredentials: true
+							},
+							//headers: {
+							//	'Authorization': 'Basic ' + btoa('admin:admin')
+							//},
+							beforeSend: function (xhr) {
+							//	alert(btoa(username + ":" + password));
+								xhr.setRequestHeader ("Authorization", "Basic " + btoa(username + ":" + password));
+							},
+							
+							success: function (){
+								 alert('Thanks for your comment!'); 
+							},
+							
+							failure: function(errMsg) {
+								 alert("f: " + errMsg); 
+							},
+							
+							error: function (request, status, error) {
+								alert("err: " + request.responseText);
+							}
+						});
+					//});
+			//})			
+        </script>
+    </head>
+    <body>
+        <p id="result"></p>
+        <p>
+            <textarea name="input" id="input"></textarea>
+        </p>
+        <p>
+            <input name="evaluate" id="evaluate" value="evaluate" type="button" />
+        </p>
+    </body>
+</html>

@@ -1,0 +1,35 @@
+<html>
+    <head>
+        <title>Math is fun?!</title>
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
+        <script type="text/javascript" src="jquery.jsonrpc.js"></script>
+        <script type="text/javascript">
+            $(document).ready(function() {
+                $.jsonRPC.setup({
+                    endPoint : 'http://211.79.63.108:8080/status',
+                    namespace : ''
+                });
+                //$("input#evaluate").click(function() {
+                    $.jsonRPC.request('getPhysicalTopology', {
+                        params : [],
+                        success : function(data) {
+                            $("<p />").text(data.result).appendTo($("p#result"));
+                        },
+                        error : function(data) {
+                            $("<p />").text(data.error.message).appendTo($("p#result"));
+                        }
+                    });
+                //});
+            });
+        </script>
+    </head>
+    <body>
+        <p id="result"></p>
+        <p>
+            <textarea name="input" id="input"></textarea>
+        </p>
+        <p>
+            <input name="evaluate" id="evaluate" value="evaluate" type="button" />
+        </p>
+    </body>
+</html>
