@@ -180,7 +180,7 @@ Topology.prototype.add_switches = function (switches) {
 
 Topology.prototype.add_links = function (links) {
     for (var i = 0; i < links.length; i++) {
-        console.log("add link: " + JSON.stringify(links[i]));
+        //console.log("add link: " + JSON.stringify(links[i]));
 
         var src_dpid = links[i].src.dpid;
         var dst_dpid = links[i].dst.dpid;
@@ -295,39 +295,78 @@ function download(filename, text) {
     }
 }
 
-function update_active_topology() {
+function update_active_topology(index) {
 	
-	d3.xhr("http://211.79.63.108:8080/status")
-		.post(
-			JSON.stringify({"jsonrpc": "2.0", "method": "getPhysicalTopology", "params": {}, "id": 1}),
-			//function(err, rawData){
-			//	var data = JSON.parse(rawData);
-			//	console.log("got response", data);
-			//}
-			function(error, d) {
-				var rawdata = JSON.parse(d.response);
-				var graph = rawdata.result;
-				//for (var k in graph.switches) {
-				//	console.log(graph.switches[k].dpid);
+	if (index == 1) {
+		d3.xhr("http://211.79.63.108:8080/status")
+			.post(
+				JSON.stringify({"jsonrpc": "2.0", "method": "getPhysicalTopology", "params": {}, "id": 1}),
+				
+				//function(err, rawData){
+				//	var data = JSON.parse(rawData);
+				//	console.log("got response", data);
 				//}
-				//topo.initialize({switches: graph.switches, links: graph.links});
-				topo.update_active(graph.switches, graph.links);
-				elem.update();
-			}
-		);
+				function(error, d) {
+					var rawdata = JSON.parse(d.response);
+					var graph = rawdata.result;
+					//for (var k in graph.switches) {
+					//	console.log(graph.switches[k].dpid);
+					//}
+					//topo.initialize({switches: graph.switches, links: graph.links});
+					
+					topo.update_active(graph.switches, graph.links);
+					
+					elem.update();
+				}
+			);
+	}
+	
+	if (index == 2) {
+		d3.xhr("http://211.79.63.108:8080/status")
+			.post(
+				JSON.stringify({"jsonrpc": "2.0", "method": "getVirtualSwitchMapping", "params": {"tenantId": 1}, "id": 1}),
+				
+				function(error, d) {
+					var rawdata = JSON.parse(d.response);
+					var graph = rawdata.result;
+					
+					topo.update_active(graph.switches, graph.primarylinks);
+					elem.update();
+				}
+			);
+	}
 	
 }
 
-function initialize_topology() {
-	// Read from data with JSON format
-	d3.json("/i2.topo.json", function(error, basic_graph) {
-		if (error) return console.warn(error);
-		for (var k in basic_graph.switches) {
-			console.log(basic_graph.switches[k].dpid);
-		}
-		topo.initialize({switches: basic_graph.switches, links: basic_graph.links});
-		//elem.update();
-	});
+function initialize_topology(index) {
+	if (index == 1) {
+		// Read from data with JSON format
+		d3.json("/i2.topo.json", function(error, basic_graph) {
+			if (error) return console.warn(error);
+			for (var k in basic_graph.switches) {
+				console.log(basic_graph.switches[k].dpid);
+			}
+			topo.initialize({switches: basic_graph.switches, links: basic_graph.links});
+			//elem.update();
+		});
+	}
+
+	if (index == 2) {
+		d3.xhr("http://211.79.63.108:8080/status")
+			.post(
+				JSON.stringify({"jsonrpc": "2.0", "method": "getVirtualSwitchMapping", "params": {"tenantId": 1}, "id": 1}),
+				
+				function(error, d) {
+					var rawdata = JSON.parse(d.response);
+					var graph = rawdata.result;
+					
+					// concat "primary" and "backup" links
+					var all_links = graph.primarylinks.concat(graph.backuplinks);
+					//console.log("links: " + JSON.stringify(all_links));
+					topo.initialize({switches: graph.switches, links: all_links});
+				}
+			);
+	}
 }
 
 function mouseover() {
@@ -354,10 +393,10 @@ function main() {
 	elem.link = elem.svg.selectAll(".link");
 	elem.port = elem.svg.selectAll(".port");
 	
-	initialize_topology();
-    //update_active_topology();
+	index = 2;
 	
-	setInterval(function() { update_active_topology() }, 1000);
+	initialize_topology(index);
+	setInterval(function() { update_active_topology(index) }, 1000);
 }
 
 main();
