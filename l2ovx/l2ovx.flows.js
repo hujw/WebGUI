@@ -1,6 +1,7 @@
 'use strict';
 
-// title div with label and button
+var currTask = 0;
+/* // title div with label and button
 var header = d3.select("body").append("div")
 				.attr("class", "well");
 header.append("h3").text("Get Flows Info from L2OVX");
@@ -9,7 +10,6 @@ var taskLabel = header.append("label")
 					.attr("id", "taskLabel")
 					.html("&nbsp;");
 
-var currTask = 0;
 var taskButton = header.append("button")
 					.attr("class", "btn btn-primary")
 					.style("margin-bottom", "20px")
@@ -24,15 +24,30 @@ var taskButton = header.append("button")
 					  // next task
 					  //currTask = ++currTask % tasks.length;
 					})
-
+ */
 // container for array of tables
 var tableDiv = d3.select("body").append("div")
 					.attr("id", "tableDiv1");
+					
+var taskButton = tableDiv.append("button")
+					.attr("class", "btn btn-primary")
+					.style("margin-bottom", "20px")
+					.style("width", "100%")
+					.style("text-align", "left")
+					.text("Get flows from all switches")
+					.on("click", function() {
+					  this.blur();
+					  // execute the task
+					  tasks[currTask]("");
+					  
+					  // next task
+					  //currTask = ++currTask % tasks.length;
+					})
 
 // initial data
 var tableData;
 var initialData = [
-  { table: "Flows in All Switches", rows: [] },
+  { table: "Flows in all switches", rows: [] },
 //  { table: "Another Table", rows: [
 //      { id: "1", dpid: "dp1", match: "Row1", actions: "DataT2R1" },
 //      { id: "2", dpid: "dp2", match: "Row2", actions: "DataT2R2" },
@@ -76,17 +91,17 @@ function task0(selected_dpid = "") {
 			
 			if (switches[dpid].length > 0) {
 				for (var f in switches[dpid]) {
-					match = JSON.stringify(switches[dpid][f].match);
-					actions = JSON.stringify(switches[dpid][f].actionsList);
-					
-					tableData[0].rows.push({ 
-						id: index, 
-						dipd: dpid, 
-						match: match, 
-						actions: actions 
-					});
-					index++;
-				}
+					match = match.concat(JSON.stringify(switches[dpid][f].match,replacer) + '\n');
+					actions = actions.concat(JSON.stringify(switches[dpid][f].actionsList,replacer) + '\n');
+				}	
+				tableData[0].rows.push({ 
+					id: index, 
+					dipd: dpid, 
+					match: match, 
+					actions: actions 
+				});
+				index++;
+				
 			} else {
 				tableData[0].rows.push({ 
 					id: index, 
@@ -104,6 +119,14 @@ function task0(selected_dpid = "") {
 
   //taskLabel.text("Step 1: Initial tables loaded");
   //taskButton.text("Next step: ");
+}
+
+function replacer(key, value) {
+	var filters = ["wildcards", "dl_vlan_pcp"];
+  if (filters.includes(key)) {
+    return undefined;
+  }
+  return value;
 }
 
 // task list (array of functions)

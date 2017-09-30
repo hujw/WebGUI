@@ -6,33 +6,36 @@
 	<script src="http://d3js.org/d3.v3.min.js"></script>
 	<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
 	<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-    <script type="text/javascript" src="http://w2ui.com/src/w2ui-1.5.rc1.min.js"></script>
+    <script type="text/javascript" src="http://rawgit.com/vitmalina/w2ui/master/dist/w2ui.min.js"></script>
 	<script src="ajax.js"></script>
 	<script src="utils.js"></script>
 	
 	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/css/bootstrap.min.css" media="all">
-	<link rel="stylesheet" type="text/css" href="http://w2ui.com/src/w2ui-1.5.rc1.min.css" />
+	<link rel="stylesheet" type="text/css" href="http://rawgit.com/vitmalina/w2ui/master/dist/w2ui.min.css" />
 	<link rel="stylesheet" type="text/css" href="l2ovx.topo.css">
 	<link rel="stylesheet" type="text/css" href="table.css">
 </head>
 
-<body>
-<h1>L2OVX Topology Viewer</h1>
-	<script src="l2ovx.topo.js"></script>
+<body style="margin: 0px;">
+<h3>L2OVX Topology Viewer</h3>
+	<script src="l2ovx.topo1.js"></script>
 	<script src="l2ovx.flows.js"></script>
+	<script src="l2ovx.log.js"></script>
+	<script src="l2ovx.tenants.js"></script>
+	<script src="graph.js"></script>
 	
-	<div id="myLayout" style="height: 800px"></div>
+	<div id="layout" style="position: absolute; width: 100%; height: 92%; z-index: -2"></div>
 	
-	<script>
-/*
+	<script>	
+	
 	$(function () {
 
 		var pstyle = 'background-color: #F5F6F7; border: 1px solid #dfdfdf; padding: 5px;';
-		$('#myLayout').w2layout({
-			name: 'myLayout',
+		$('#layout').w2layout({
+			name: 'layout',
 			panels: [
-				{ type: 'top',  size: 50, resizable: true, style: pstyle, content: 'top' },
-				{ type: 'left', size: 200, resizable: true, style: pstyle, content: 'left' },
+				//{ type: 'top',  size: 50, resizable: true, style: pstyle, content: top_title },
+				{ type: 'left', size: '10%', resizable: true, style: pstyle, content: tenantList },
 				{ type: 'main', 
 					style: pstyle, 
 					content: topology,
@@ -50,13 +53,14 @@
 					//}
 				},
 				// tableDiv1 from flows.js
-				{ type: 'preview', size: '30%', resizable: true, style: pstyle, content: tableDiv1 },
+				{ type: 'preview', size: '40%', resizable: true, style: pstyle, content: tableDiv1 },
 				//{ type: 'right', size: 200, resizable: true, style: pstyle, content: 'right' },
-				{ type: 'bottom', size: 50, resizable: true, style: pstyle, content: 'bottom' }
+				{ type: 'bottom', size: '20%', resizable: true, style: pstyle, 
+					content: '<textarea id="logContent">123</textarea>' }
 			]
 		}); 
 	});
-*/
+
 	</script>
 </body>
 </html>

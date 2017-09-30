@@ -21,10 +21,7 @@ var tip = d3.tip()
 $(".d3-tip").css({"position":"absolute", "z-index":"1"});
 
 var color = d3.scale.category20();
-// basic Topology instance
 var topo = new Topology();
-// current Topology instance
-var active_topo = new Topology();
 
 var elem = {
     force: d3.layout.force()
@@ -63,22 +60,34 @@ function tick() {
 		});
 }
 
+function mouseover() {
+	d3.select(this).select("circle").transition()
+		.duration(750)
+		.attr("r", 26);
+
+	d3.select(this).select("text").transition()
+		.duration(750)
+		.attr("x", 13)
+			.style("stroke-width", ".5px")
+			.style("font", "17.5px serif")
+			.style("opacity", 1);
+}
+
+function mouseout() {
+	d3.select(this).select("circle").transition()
+		.duration(750)
+		.attr("r", 16);
+}
+
+// Define funtions of the 'elem' object 
+// Function 'drag'
 elem.drag = elem.force.drag().on("dragstart", dragstart);	
 function dragstart(d) {
 	d3.select(this).classed("fixed", d.fixed = true);
-	//d3.select(this).attr("transform", function(d) {return "translate(" + (d.x+100) + "," + (d.y+100) + ")"; });
 }
 
+// Function 'update'
 elem.update = function () {
-/*
-	elem.node.remove();
-	elem.link.remove();
-	elem.port.remove();
-
-	elem.node = elem.svg.selectAll(".node");
-	elem.link = elem.svg.selectAll(".link");
-	elem.port = elem.svg.selectAll(".port");
-*/
 	this.node.remove();
 	this.link.remove();
 	this.port.remove();
@@ -92,10 +101,10 @@ elem.update = function () {
 		.links(topo.links)
 	//.start();
 
+	// Define links
 	this.link = this.link.data(topo.links);
 	this.link.enter().append("line")
 		.attr("class", "link")
-		//.style("stroke-width", function(d) { return Math.sqrt(d.value); })
 		.style("stroke-width", function(d) { return '3px'; })
 		.style("stroke", function(d) { 
 			//return d.active;
@@ -103,23 +112,8 @@ elem.update = function () {
 			else { return "red" }
 		});
 	this.link.exit().remove();
-
-//	this.node = this.node.data(topo.switches);
-//	var nodeEnter = this.node.enter().append("g")
-//		.attr("class", "node")
-//		.style("fill", function(d) { return color(d.group); })
-//		.style("opacity", 0.9)
-//		.on("mouseover", mouseover)
-//		.on("mouseout", mouseout)
-//		.call(this.drag);
-//	nodeEnter.append("circle")
-//		.attr("r", 16);
-//	nodeEnter.append("svg:text")
-//		.attr("class", "nodetext")
-//		.attr("dx", 12)
-//		.attr("dy", ".35em")
-//		.text(function(d) { return d.dpid });
 	
+	// Define nodes
     this.node = this.node.data(topo.switches);
     var nodeEnter = this.node.enter().append("g")
         .attr("class", "node")
@@ -127,8 +121,6 @@ elem.update = function () {
 		.on('mouseover', tip.show)
 		.on('mouseout', tip.hide)
 		.on("click", function(d) {
-			//var dpidValue = trim(d.dpid);
-			//d3.select(this).attr("transform", "translate(200, 0)");
 			console.log("Click: " + d.dpid + ", " + d.x);
 			tasks[currTask](d.dpid);
 		})
@@ -143,6 +135,7 @@ elem.update = function () {
         .attr("y", -CONF.image.height/2)
         .attr("width", CONF.image.width)
         .attr("height", CONF.image.height);
+		
     nodeEnter.append("text")
         .attr("dx", -CONF.image.width/2)
         .attr("dy", CONF.image.height-10)
@@ -150,6 +143,7 @@ elem.update = function () {
 		
 	this.node.exit().remove();
 	
+	// Define ports
 	var ports = topo.get_ports();
     this.port.remove();
     this.port = this.svg.selectAll(".port").data(ports);
@@ -163,6 +157,7 @@ elem.update = function () {
         .attr("dy", 12)
         .text(function(d) { return d.port });
 		
+	// Start
 	this.force.start();
 };
 
@@ -200,8 +195,6 @@ Topology.prototype.add_switches = function (switches) {
 
 Topology.prototype.add_links = function (links) {
     for (var i = 0; i < links.length; i++) {
-        //console.log("add link: " + JSON.stringify(links[i]));
-
         var src_dpid = links[i].src.dpid;
         var dst_dpid = links[i].dst.dpid;
         var src_index = this.switch_index[src_dpid];
@@ -293,28 +286,6 @@ Topology.prototype.update_active = function(active_switches, active_links) {
 	}
 }
 
-function include(arr, obj) {
-    for(var i=0; i<arr.length; i++) {
-        if (arr[i] == obj) return true;
-    }
-}
-
-
-function download(filename, text) {
-    var pom = document.createElement('a');
-    pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-    pom.setAttribute('download', filename);
-
-    if (document.createEvent) {
-        var event = document.createEvent('MouseEvents');
-        event.initEvent('click', true, true);
-        pom.dispatchEvent(event);
-    }
-    else {
-        pom.click();
-    }
-}
-
 function update_active_topology(index) {
 	
 	var req = new L2OVXRequest("getVirtualSwitchMapping", {"tenantId": 1});
@@ -404,25 +375,6 @@ function initialize_topology(index) {
 				}
 			);
 	}
-}
-
-function mouseover() {
-	d3.select(this).select("circle").transition()
-		.duration(750)
-		.attr("r", 26);
-
-	d3.select(this).select("text").transition()
-		.duration(750)
-		.attr("x", 13)
-			.style("stroke-width", ".5px")
-			.style("font", "17.5px serif")
-			.style("opacity", 1);
-}
-
-function mouseout() {
-	d3.select(this).select("circle").transition()
-		.duration(750)
-		.attr("r", 16);
 }
 
 function main() {
